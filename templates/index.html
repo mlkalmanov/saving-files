@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Загрузка файла</title>
+</head>
+<body>
+    <h2>Прикрепите файл и нажмите "save"</h2>
+    <form action="/upload" method="POST" enctype="multipart/form-data">
+        <input type="file" name="file" required><br><br>
+        <input type="submit" value="save">
+    </form>
+    <br>
+    <form action="/list" method="get">
+        <button type="submit">Downloads</button>
+    </form>
+</body>
+</html>

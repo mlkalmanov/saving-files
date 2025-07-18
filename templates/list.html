@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Список файлов</title>
+</head>
+<body>
+    <h1>Сохранённые файлы</h1>
+    {% if files %}
+        <ul>
+        {% for file in files %}
+            <li><a href="{{ url_for('uploaded_file', filename=file) }}">{{ file }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Файлы не загружены.</p>
+    {% endif %}
+<br>
+    <form action="/" method="get">
+        <button type="submit">Назад к загрузке</button>
+    </form>
+</body>
+</html>
