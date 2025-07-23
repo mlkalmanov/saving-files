@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>List of files</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+
+        h1 {
+            color: #1e293b;
+            margin-bottom: 30px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        ul {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            list-style: none;
+            margin: 0 0 30px 0;
+        }
+
+        li {
+            padding: 15px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        li:last-child {
+            border-bottom: none;
+        }
+
+        a {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        a:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+        q {
+            color: #64748b;
+            font-style: italic;
+            margin-left: 10px;
+        }
+
+        p {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+
+        form {
+            text-align: center;
+        }
+
+        button {
+            background-color: #64748b;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #475569;
+        }
+
+        br {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+   <h2>Uploaded files</h2>
+
+    {% if file_info %}
+        <ul class="file-list">
+            {% for file in file_info %}
+                <li class="file-item">
+                    <a href="/uploads/{{ file.filename }}" class="file-name">{{ file.filename }}</a>
+                    {% if file.transcript %}
+                        <div class="transcript">
+                            <strong>Transcript:</strong><br>
+                            {{ file.transcript }}
+                        </div>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <div class="file-list">
+            <div class="empty-message">
+                Files not found
+            </div>
+        </div>
+    {% endif %}
+<br>
+    <form action="/" method="get">
+        <button type="submit">Back to download</button>
+    </form>
+</body>
+</html>
