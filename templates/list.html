@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>List of files</title>
+    <title>Список файлов</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -93,7 +93,7 @@
     </style>
 </head>
 <body>
-   <h2>Uploaded files</h2>
+   <h2>Загруженные файлы</h2>
 
     {% if file_info %}
         <ul class="file-list">
@@ -102,7 +102,7 @@
                     <a href="/uploads/{{ file.filename }}" class="file-name">{{ file.filename }}</a>
                     {% if file.transcript %}
                         <div class="transcript">
-                            <strong>Transcript:</strong><br>
+                            <strong>Расшифровка:</strong><br>
                             {{ file.transcript }}
                         </div>
                     {% endif %}
@@ -112,13 +112,13 @@
     {% else %}
         <div class="file-list">
             <div class="empty-message">
-                Files not found
+                Файлы не найдены
             </div>
         </div>
     {% endif %}
 <br>
     <form action="/" method="get">
-        <button type="submit">Back to download</button>
+        <button type="submit">Назад к загрузке</button>
     </form>
 </body>
 </html>

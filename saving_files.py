@@ -58,29 +58,32 @@ def upload_file():
     Если файл MP3 - выполняет транскрибацию и сохраняет результат.
 
     Returns:
-        str: Сообщение о результате обработки файла.
+        JSON: Результат обработки файла.
     """
     if 'file' not in request.files:
-        return "Файл не выбран", 400
+        return jsonify(success=False, message='Файл не выбран'), 400
 
     file = request.files['file']
     if file.filename == '':
-        return "Имя файла пустое", 400
+        return jsonify(success=False, message='Имя файла пустое'), 400
 
-    filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-    file.save(filepath)
+    try:
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
+        file.save(filepath)
 
-    if file.filename.lower().endswith('.mp3'):
-        transcription_text = transcribe_mp3(filepath)
-        transcript_filename = os.path.splitext(file.filename)[0] + ".txt"
-        transcript_file_path = os.path.join(app.config['TRANSCRIPTS_FOLDER'], transcript_filename)
+        if file.filename.lower().endswith('.mp3'):
+            transcription_text = transcribe_mp3(filepath)
+            transcript_filename = os.path.splitext(file.filename)[0] + ".txt"
+            transcript_file_path = os.path.join(app.config['TRANSCRIPTS_FOLDER'], transcript_filename)
 
-        with open(transcript_file_path, 'w', encoding='utf-8') as f:
-            f.write(transcription_text)
+            with open(transcript_file_path, 'w', encoding='utf-8') as f:
+                f.write(transcription_text)
 
-        return f'Файл {file.filename} успешно сохранён. Расшифровка: {transcription_text}'
-    else:
-        return f'Файл {file.filename} успешно сохранён.'
+            return jsonify(success=True, message=f'Файл {file.filename} успешно сохранён. Расшифровка: {transcription_text}')
+        else:
+            return jsonify(success=True, message=f'Файл {file.filename} успешно сохранён.')
+    except Exception as e:
+        return jsonify(success=False, message=f'Ошибка обработки файла: {str(e)}'), 500
 
 @app.route('/upload_audio', methods=['POST'])
 def upload_audio():
@@ -149,6 +152,3 @@ def uploaded_file(filename):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
