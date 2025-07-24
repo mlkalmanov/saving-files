@@ -2,7 +2,8 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <title>Uploading a file</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Транскрибация голосовых сообщений</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -21,7 +22,7 @@
             text-align: center;
         }
 
-        form {
+        form, #audioRecorder {
             background: white;
             padding: 30px;
             border-radius: 12px;
@@ -69,7 +70,6 @@
             background-color: #2563eb;
         }
 
-        /* Для WebKit браузеров */
         input[type="file"]::-webkit-file-upload-button {
             background-color: #3b82f6;
             color: white;
@@ -87,7 +87,6 @@
             background-color: #2563eb;
         }
 
-        /* Добавляем стили для текста после кнопки */
         input[type="file"] {
             color: #64748b;
             font-size: 14px;
@@ -105,18 +104,40 @@
             font-weight: 500;
             transition: background-color 0.2s;
             width: 100%;
+            margin-bottom: 10px;
         }
 
         input[type="submit"]:hover, button:hover {
             background-color: #2563eb;
         }
 
-        button {
+        button.secondary {
             background-color: #64748b;
         }
 
-        button:hover {
+        button.secondary:hover {
             background-color: #475569;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .button-group button {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        #status {
+            margin-top: 10px;
+            color: green;
+        }
+
+        audio {
+            margin-top: 15px;
+            width: 100%;
         }
 
         br {
@@ -125,14 +146,93 @@
     </style>
 </head>
 <body>
-    <h2>Attach the file and click "save"</h2>
+    <h2>Транскрибация голосовых сообщений</h2>
     <form action="/upload" method="POST" enctype="multipart/form-data">
         <input type="file" name="file" required><br><br>
-        <input type="submit" value="save">
+        <input type="submit" value="Отправить запись">
     </form>
-    <br>
+
+    <section id="audioRecorder">
+        <h2>Записать аудиосообщение</h2>
+        <div class="button-group">
+            <button id="startRecord">Начать запись</button>
+            <button id="stopRecord" class="secondary" disabled>Остановить запись</button>
+        </div>
+        <audio id="audioPlayback" controls style="display:none;"></audio>
+        <div id="status"></div>
+    </section>
+
     <form action="/list" method="get">
-        <button type="submit">Downloads</button>
+        <button type="submit" class="secondary">История переговоров</button>
     </form>
+
+    <script>
+      (function(){
+        let mediaRecorder;
+        let audioChunks = [];
+
+        const startBtn = document.getElementById('startRecord');
+        const stopBtn = document.getElementById('stopRecord');
+        const audioPlayback = document.getElementById('audioPlayback');
+        const statusDiv = document.getElementById('status');
+
+        startBtn.addEventListener('click', async () => {
+          statusDiv.textContent = '';
+          audioChunks = [];
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.start();
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+
+            mediaRecorder.ondataavailable = e => {
+              audioChunks.push(e.data);
+            };
+
+            mediaRecorder.onstop = () => {
+              const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+              const audioUrl = URL.createObjectURL(audioBlob);
+              audioPlayback.src = audioUrl;
+              audioPlayback.style.display = 'block';
+
+              const formData = new FormData();
+              const filename = 'recording_' + Date.now() + '.webm';
+              formData.append('audio', audioBlob, filename);
+
+              fetch('/upload_audio', {
+                method: 'POST',
+                body: formData
+              })
+              .then(res => res.json())
+              .then(data => {
+                if(data.success) {
+                  statusDiv.style.color = 'green';
+                  statusDiv.textContent = 'Аудио и расшифровка успешно сохранены.';
+                } else {
+                  statusDiv.style.color = 'red';
+                  statusDiv.textContent = 'Ошибка: ' + data.message;
+                }
+              })
+              .catch(err => {
+                statusDiv.style.color = 'red';
+                statusDiv.textContent = 'Ошибка отправки: ' + err.message;
+              });
+            };
+          } catch (err) {
+            statusDiv.style.color = 'red';
+            statusDiv.textContent = 'Невозможно получить доступ к микрофону: ' + err.message;
+          }
+        });
+
+        stopBtn.addEventListener('click', () => {
+          if(mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+          }
+        });
+      })();
+    </script>
 </body>
 </html>
