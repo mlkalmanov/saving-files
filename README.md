@@ -3,8 +3,8 @@
 В процессе создания использовались **Python Flask** и модель для транскрибации **faster-whisper**.
 ## Запуск
 * Перед использованием установите все необходимые библиотеки
-```
-from flask import Flask, request, render_template, send_from_directory
+``` python
+from flask import Flask, request, render_template, send_from_directory, jsonify
 import os
 from faster_whisper import WhisperModel
 ```
@@ -20,6 +20,8 @@ from faster_whisper import WhisperModel
 
 ```WhisperModel``` - модель для транскрибации
 
+```jsonify``` - для преобразования данных в формат json
+
 * Чтобы запустить приложение, вернитесь в терминал и выполните команду ```python saving_files.py``` или нажмите кнопку "Run" в текстовом редакторе.
 * Далее передите в браузер и откройте страницу http://127.0.0.1:5000 или просто перейдите по ссылке, которая вывелась в консоль.
 
@@ -30,22 +32,32 @@ from faster_whisper import WhisperModel
 
 ### Главная страница 
 
-<img width="624" height="403" alt="image" src="https://github.com/user-attachments/assets/ca315888-35ce-4630-84fb-63fab8226b0a" />
+<img width="773" height="809" alt="image" src="https://github.com/user-attachments/assets/a45ec522-6ae0-40ee-9864-06428113b907" />
+
 
 
 * Файл можно выбрать либо перетащив в поле, либо, нажав на кнопку **"Choose file"**, выбрать файл из проводника.
 * После выбора нажмите кнопку **"save"**
 * После этого вы автоматически перейдёте на страницу с уведомлением об успешной загрузке файла.
- 
-**ИЛИ**
- 
 * Если файл был с расширением ***mp3***, то так же выведется расшифровка аудиофайла.
+  
+**ИЛИ**
 
+Можно записать голосовое сообщение самостоятельно:
+
+<img width="760" height="266" alt="image" src="https://github.com/user-attachments/assets/61891570-1959-49c4-8819-43293cd85119" />
+
+
+* Нажмите на кнопку "Начать запись"
+* Скажите всё, что необходимо
+* Завершите запись, нажав на кнопку повторно
+
+(Загрузка голосовых сообщений и их обработка займёт больше времени, чем загрузка обычных файлов из-за транскрибации)
 ### Сохранение файлов и расшифровок
 Все фалы после выбора сохраняются в папку uploads, а для сохранения расшифровки создаётся тектовый файл с таким же названием как у изначального файла, но с расширением **txt**, который в свою очередь сохраняется в папку transcripts.
 
 *Кодом предусмотрено, что если папка заранее не создана, то папка создаётся автоматически.*
-```
+``` python
 UPLOAD_FOLDER = 'uploads'
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
@@ -58,37 +70,39 @@ if not os.path.exists(TRANSCRIPTS_FOLDER):
 
 
 ### Список файлов
-<img width="626" height="135" alt="image" src="https://github.com/user-attachments/assets/c3c0178c-bd2c-4be7-8eb2-9f0677e5db06" />
+<img width="759" height="156" alt="image" src="https://github.com/user-attachments/assets/c00b5bc3-6039-4629-9a96-1f9ce8074259" />
 
 
-Нажав на кнопку downloads, вы попадаете на страницу list.
+
+Нажав на кнопку "История переговоров", вы попадаете на страницу list.
 
 <img width="840" height="358" alt="image" src="https://github.com/user-attachments/assets/a3a4c3b9-2b86-4278-b269-17cdad773f74" />
 
 
 При генерации берутся данные о находящихся в папке uploads файлов и при наличии файла с идентичным именем с расширением txt в папке transcripts рядом с файлом пишется расшифровка.
 
-```
+``` python
 @app.route('/list')
 def file_list():
+    """Отображает список всех загруженных файлов и их расшифровок (если есть).
+
+    Returns:
+        str: HTML шаблон со списком файлов.
+    """
     files = os.listdir(app.config['UPLOAD_FOLDER'])
-    file_info = [] # Список для информации о файлах
+    file_info = []
+
     for filename in files:
-        # Проверяем, является ли файл MP3
         if filename.lower().endswith('.mp3'):
-            # Создаем имя файла расшифровки
             transcript_filename = os.path.splitext(filename)[0] + ".txt"
-            # Создаем полный путь к файлу расшифровки
             transcript_file_path = os.path.join(app.config['TRANSCRIPTS_FOLDER'], transcript_filename)
-            # Проверяем, существует ли файл расшифровки
+
             if os.path.exists(transcript_file_path):
-                # Читаем содержимое файла расшифровки
                 with open(transcript_file_path, 'r', encoding='utf-8') as f:
                     transcript = f.read()
             else:
                 transcript = ""
         else:
-            # Для не-MP3 файлов расшифровка пустая
             transcript = ""
 
         file_info.append({'filename': filename, 'transcript': transcript})
@@ -98,37 +112,50 @@ def file_list():
 
 Также при нажатии на имя файла можно его скачать.
 
-```
+``` python
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
-    #отправляем файл пользователю как вложение для скачивания
+    """Позволяет скачать загруженный файл.
+
+    Args:
+        filename (str): Имя файла для скачивания.
+
+    Returns:
+        Response: Файл для скачивания.
+    """
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename, as_attachment=True)
 ```
 
-Нажав на кнопку "Back to download", пользователь возвращается на главную страницу.
+Нажав на кнопку "Назад к загрузке", пользователь возвращается на главную страницу.
 ## faster-whisper
 
 Настройка модели Whisper
 
-```
-device = "cpu" # Используем CPU для обработки
+``` python
+device = "cpu"  # Используем CPU для обработки
 whisper_model = WhisperModel(
-    "Systran/faster-whisper-base", # Название модели
-    compute_type="int8", # Тип вычислений (int8 для экономии памяти)
-    device=device # Устройство для вычислений
+    "Systran/faster-whisper-base",  # Название модели
+    compute_type="int8",  # Тип вычислений (int8 для экономии памяти)
+    device=device  # Устройство для вычислений
 )
 ```
 
 Функция для транскрибации
-```
+``` python
 def transcribe_mp3(file_path):
-    # Получаем сегменты и информацию о файле
+    """Транскрибирует MP3 файл с помощью модели Whisper.
+
+    Args:
+        file_path (str): Путь к MP3 файлу для транскрибации.
+
+    Returns:
+        str: Текстовая расшифровка аудиофайла.
+    """
     segments, info = whisper_model.transcribe(file_path, beam_size=5)
-    text = "" # Инициализируем пустую строку для текста
-    # Проходим по всем сегментам и собираем текст
+    text = ""
     for segment in segments:
         text += segment.text.strip() + " "
-    return text.strip() # Возвращаем текст без лишних пробелов
+    return text.strip()
 ```
 
 
