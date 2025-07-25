@@ -79,7 +79,7 @@ def upload_file():
             with open(transcript_file_path, 'w', encoding='utf-8') as f:
                 f.write(transcription_text)
 
-            return jsonify(success=True, message=f'Файл {file.filename} успешно сохранён. Расшифровка: {transcription_text}')
+            return jsonify(success=True, message=f'Файл {file.filename} успешно сохранён.')
         else:
             return jsonify(success=True, message=f'Файл {file.filename} успешно сохранён.')
     except Exception as e:
