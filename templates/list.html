@@ -90,6 +90,18 @@
         br {
             display: none;
         }
+        .file-meta {
+        color: #64748b;
+        font-size: 0.9em;
+        margin-top: 5px;
+    }
+
+    .transcript {
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #f1f5f9;
+        border-radius: 6px;
+    }
     </style>
 </head>
 <body>
@@ -100,7 +112,7 @@
             {% for file in file_info %}
                 <li class="file-item">
                     <a href="/uploads/{{ file.filename }}" class="file-name">{{ file.filename }}</a>
-                    <div class="file-meta">Загружен: {{ file.created_time }}</div>
+                    <span class="file-meta">{{ file.created_time }}</span>
                     {% if file.transcript %}
                         <div class="transcript">
                             <strong>Расшифровка:</strong><br>

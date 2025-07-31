@@ -123,7 +123,7 @@ def file_list():
     for filename in files:
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
         created_time = datetime.fromtimestamp(os.path.getctime(filepath))
-        formatted_time = created_time.strftime('%d.%m.%Y %H:%M:%S')
+        formatted_time = created_time.strftime('%d.%m.%Y %H:%M')
 
         if filename.lower().endswith('.mp3'):
             transcript_filename = os.path.splitext(filename)[0] + ".txt"
