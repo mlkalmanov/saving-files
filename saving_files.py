@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, send_from_directory, jsonify
 import os
 from faster_whisper import WhisperModel
+from datetime import datetime
 
 # Папки для хранения файлов
 UPLOAD_FOLDER = 'uploads'  # Папка для загруженных файлов
@@ -120,6 +121,10 @@ def file_list():
     file_info = []
 
     for filename in files:
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        created_time = datetime.fromtimestamp(os.path.getctime(filepath))
+        formatted_time = created_time.strftime('%d.%m.%Y %H:%M:%S')
+
         if filename.lower().endswith('.mp3'):
             transcript_filename = os.path.splitext(filename)[0] + ".txt"
             transcript_file_path = os.path.join(app.config['TRANSCRIPTS_FOLDER'], transcript_filename)
@@ -132,7 +137,7 @@ def file_list():
         else:
             transcript = ""
 
-        file_info.append({'filename': filename, 'transcript': transcript})
+        file_info.append({'filename': filename, 'transcript': transcript, 'created_time': formatted_time})
 
     return render_template('list.html', file_info=file_info)
 

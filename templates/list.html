@@ -100,6 +100,7 @@
             {% for file in file_info %}
                 <li class="file-item">
                     <a href="/uploads/{{ file.filename }}" class="file-name">{{ file.filename }}</a>
+                    <div class="file-meta">Загружен: {{ file.created_time }}</div>
                     {% if file.transcript %}
                         <div class="transcript">
                             <strong>Расшифровка:</strong><br>
