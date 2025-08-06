@@ -1,5 +1,5 @@
 # Используем официальный образ Python
-FROM python:3.9-slim
+FROM python:3.13-slim
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
@@ -12,9 +12,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Копируем остальные файлы
 COPY . .
-
-# Создаем папки для загрузок
-RUN mkdir -p uploads transcripts
 
 # Открываем порт
 EXPOSE 5000
