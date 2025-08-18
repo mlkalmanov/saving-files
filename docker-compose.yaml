@@ -1,0 +1,15 @@
+services:
+  sf:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./uploads:/app/uploads
+      - ./transcripts:/app/transcripts
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+
+volumes:
+  uploads:
+  transcripts:
