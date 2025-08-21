@@ -109,6 +109,46 @@ def upload_audio():
     return jsonify(success=True)
 
 
+@app.route('/recent_transcripts')
+def recent_transcripts():
+    """Возвращает JSON с последними тремя расшифровками."""
+    files = os.listdir(app.config['UPLOAD_FOLDER'])
+    file_info = []
+
+    for filename in files:
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        created_time = datetime.fromtimestamp(os.path.getctime(filepath))
+        formatted_time = created_time.strftime('%d.%m.%Y %H:%M')
+
+        if filename.lower().endswith('.mp3'):
+            transcript_filename = os.path.splitext(filename)[0] + ".txt"
+            transcript_file_path = os.path.join(app.config['TRANSCRIPTS_FOLDER'], transcript_filename)
+
+            if os.path.exists(transcript_file_path):
+                with open(transcript_file_path, 'r', encoding='utf-8') as f:
+                    transcript = f.read()
+            else:
+                transcript = ""
+        else:
+            transcript = ""
+
+        file_info.append({
+            'filename': filename,
+            'transcript': transcript,
+            'created_time': formatted_time,
+            'timestamp': os.path.getctime(filepath)
+        })
+
+    # Сортируем по времени создания (новые сначала) и берем первые 3
+    file_info.sort(key=lambda x: x['timestamp'], reverse=True)
+    recent_files = file_info[:3]
+
+    # Убираем временную метку из ответа
+    for file in recent_files:
+        del file['timestamp']
+
+    return jsonify(recent_files)
+
 
 @app.route('/list')
 def file_list():

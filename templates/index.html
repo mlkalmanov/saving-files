@@ -142,15 +142,75 @@
         br {
             display: none;
         }
+
+        /* Стили для блока последних расшифровок */
+        .recent-transcripts {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .recent-transcripts h3 {
+            color: #1e293b;
+            margin-bottom: 15px;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .transcript-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .transcript-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .transcript-item:last-child {
+            border-bottom: none;
+        }
+
+        .transcript-filename {
+            color: #3b82f6;
+            text-decoration: none;
+            font-weight: 500;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .transcript-filename:hover {
+            color: #2563eb;
+            text-decoration: underline;
+        }
+
+        .transcript-meta {
+            color: #64748b;
+            font-size: 0.9em;
+            margin-bottom: 8px;
+        }
+
+        .transcript-text {
+            margin-top: 8px;
+            padding: 10px;
+            background-color: #f1f5f9;
+            border-radius: 6px;
+            font-size: 0.95em;
+            line-height: 1.4;
+        }
+
+        .empty-message {
+            color: #64748b;
+            text-align: center;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
     <h2>Транскрибация голосовых сообщений</h2>
-    <!-- form action="/upload" method="POST" enctype="multipart/form-data" id="uploadForm">
-        <input type="file" name="file" required><br><br>
-        <input type="submit" value="Отправить запись">
-        <div id="uploadStatus" style="margin-top: 10px;"></div>
-    </form -->
 
     <section id="audioRecorder">
         <h2>Записать аудиосообщение</h2>
@@ -158,6 +218,14 @@
         <div id="recordingStatus" class="recording-status" style="display: none;">Говорите. Идёт запись</div>
         <audio id="audioPlayback" controls style="display:none;"></audio>
         <div id="status"></div>
+    </section>
+
+    <!-- Блок последних расшифровок -->
+    <section class="recent-transcripts">
+        <h3>Последние расшифровки</h3>
+        <div id="recentTranscriptsList">
+            <div class="empty-message">Загрузка...</div>
+        </div>
     </section>
 
     <form action="/list" method="get">
@@ -175,9 +243,43 @@
             const audioPlayback = document.getElementById('audioPlayback');
             const statusDiv = document.getElementById('status');
 
+            // Функция для загрузки последних расшифровок
+            function loadRecentTranscripts() {
+                fetch('/recent_transcripts')
+                    .then(response => response.json())
+                    .then(data => {
+                        const container = document.getElementById('recentTranscriptsList');
+
+                        if (data.length === 0) {
+                            container.innerHTML = '<div class="empty-message">Нет расшифровок</div>';
+                            return;
+                        }
+
+                        let html = '<ul class="transcript-list">';
+                        data.forEach(item => {
+                            html += `
+                                <li class="transcript-item">
+                                    <a href="/uploads/${item.filename}" class="transcript-filename">${item.filename}</a>
+                                    <div class="transcript-meta">${item.created_time}</div>
+                                    ${item.transcript ? `<div class="transcript-text">${item.transcript}</div>` : ''}
+                                </li>
+                            `;
+                        });
+                        html += '</ul>';
+                        container.innerHTML = html;
+                    })
+                    .catch(error => {
+                        console.error('Ошибка загрузки расшифровок:', error);
+                        document.getElementById('recentTranscriptsList').innerHTML =
+                            '<div class="empty-message">Ошибка загрузки</div>';
+                    });
+            }
+
+            // Загружаем расшифровки при загрузке страницы
+            document.addEventListener('DOMContentLoaded', loadRecentTranscripts);
+
             recordButton.addEventListener('click', async () => {
                 if (isRecording) {
-                    // Остановить запись
                     if(mediaRecorder && mediaRecorder.state !== 'inactive') {
                         mediaRecorder.stop();
                         recordButton.textContent = 'Начать запись';
@@ -222,6 +324,7 @@
                                 if(data.success) {
                                     statusDiv.style.color = 'green';
                                     statusDiv.textContent = 'Аудио и расшифровка успешно сохранены.';
+                                    loadRecentTranscripts();
                                 } else {
                                     statusDiv.style.color = 'red';
                                     statusDiv.textContent = 'Ошибка: ' + data.message;
@@ -246,34 +349,6 @@
                 }
             });
         })();
-    </script>
-    <script>
-        document.getElementById('uploadForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(this);
-            const statusDiv = document.getElementById('uploadStatus');
-            statusDiv.textContent = 'Обработка файла...';
-            statusDiv.style.color = 'black';
-
-            fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(res => res.json())
-            .then(data => {
-                if(data.success) {
-                    statusDiv.style.color = 'green';
-                    statusDiv.textContent = data.message;
-                } else {
-                    statusDiv.style.color = 'red';
-                    statusDiv.textContent = 'Ошибка: ' + data.message;
-                }
-            })
-            .catch(err => {
-                statusDiv.style.color = 'red';
-                statusDiv.textContent = 'Ошибка отправки: ' + err.message;
-            });
-        });
     </script>
 </body>
 </html>
