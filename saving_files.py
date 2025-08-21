@@ -20,7 +20,7 @@ app.config['TRANSCRIPTS_FOLDER'] = TRANSCRIPTS_FOLDER
 # Инициализация модели Whisper
 device = "cpu"  # Используем CPU для обработки
 whisper_model = WhisperModel(
-    "Systran/faster-whisper-base",  # Название модели
+    "mobiuslabsgmbh/faster-whisper-large-v3-turbo",  # Название модели
     compute_type="int8",  # Тип вычислений (int8 для экономии памяти)
     device=device  # Устройство для вычислений
 )
@@ -196,4 +196,4 @@ def uploaded_file(filename):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=False)
+    app.run(host='0.0.0.0', port=8080, debug=False)
