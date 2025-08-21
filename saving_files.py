@@ -141,7 +141,7 @@ def recent_transcripts():
 
     # Сортируем по времени создания (новые сначала) и берем первые 3
     file_info.sort(key=lambda x: x['timestamp'], reverse=True)
-    recent_files = file_info[:3]
+    recent_files = file_info[:10]
 
     # Убираем временную метку из ответа
     for file in recent_files:
