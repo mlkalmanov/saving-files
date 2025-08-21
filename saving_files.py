@@ -177,7 +177,15 @@ def file_list():
         else:
             transcript = ""
 
-        file_info.append({'filename': filename, 'transcript': transcript, 'created_time': formatted_time})
+        file_info.append({'filename': filename, 'transcript': transcript, 'created_time': formatted_time, 'timestamp': os.path.getctime(filepath)})
+
+    # Сортируем по времени создания (новые сначала) и берем первые 3
+    file_info.sort(key=lambda x: x['timestamp'], reverse=True)
+    recent_files = file_info
+
+    # Убираем временную метку из ответа
+    for file in recent_files:
+        del file['timestamp']
 
     return render_template('list.html', file_info=file_info)
 
