@@ -178,7 +178,7 @@
             color: #3b82f6;
             text-decoration: none;
             font-weight: 500;
-            display: block;
+            display: inline;
             margin-bottom: 5px;
         }
 
@@ -188,10 +188,19 @@
         }
 
         .transcript-meta {
+            display: inline;
             color: #64748b;
             font-size: 0.9em;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
+            margin-left: 5px;
         }
+
+        .transcript-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+    }
+
 
         .transcript-text {
             margin-top: 8px;
@@ -268,8 +277,10 @@
                         data.forEach(item => {
                             html += `
                                 <li class="transcript-item">
-                                    <a href="/uploads/${item.filename}" class="transcript-filename">${item.filename}</a>
-                                    <div class="transcript-meta">${item.created_time}</div>
+                                    <div class="transcript-header">
+                                        <a href="/uploads/${item.filename}" class="transcript-filename">${item.filename}</a>
+                                        <span class="transcript-meta">${item.created_time}</span>
+                                    </div>
                                     ${item.transcript ? `<div class="transcript-text">${item.transcript}</div>` : ''}
                                 </li>
                             `;
