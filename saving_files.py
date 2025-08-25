@@ -40,7 +40,7 @@ def transcribe_mp3(file_path):
     for segment in segments:
         text += segment.text.strip() + " "
     return text.strip()
-
+audio_extensions = ['.mp3', '.wav', '.m4a', '.flac', '.ogg', '.aac', '.wma', '.amr', '.webm']
 
 @app.route('/')
 def index():
@@ -72,7 +72,9 @@ def upload_file():
         filepath = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
         file.save(filepath)
 
-        if file.filename.lower().endswith('.mp3'):
+        file_extension = os.path.splitext(file.filename.lower())[1]
+
+        if file_extension in audio_extensions:
             transcription_text = transcribe_mp3(filepath)
             transcript_filename = os.path.splitext(file.filename)[0] + ".txt"
             transcript_file_path = os.path.join(app.config['TRANSCRIPTS_FOLDER'], transcript_filename)
@@ -120,7 +122,9 @@ def recent_transcripts():
         created_time = datetime.fromtimestamp(os.path.getctime(filepath))
         formatted_time = created_time.strftime('%d.%m.%Y %H:%M')
 
-        if filename.lower().endswith('.mp3'):
+        file_extension = os.path.splitext(filename.lower())[1]
+
+        if file_extension in audio_extensions:
             transcript_filename = os.path.splitext(filename)[0] + ".txt"
             transcript_file_path = os.path.join(app.config['TRANSCRIPTS_FOLDER'], transcript_filename)
 
@@ -165,7 +169,9 @@ def file_list():
         created_time = datetime.fromtimestamp(os.path.getctime(filepath))
         formatted_time = created_time.strftime('%d.%m.%Y %H:%M')
 
-        if filename.lower().endswith('.mp3'):
+        file_extension = os.path.splitext(filename.lower())[1]
+
+        if file_extension in audio_extensions:
             transcript_filename = os.path.splitext(filename)[0] + ".txt"
             transcript_file_path = os.path.join(app.config['TRANSCRIPTS_FOLDER'], transcript_filename)
 
@@ -188,7 +194,6 @@ def file_list():
         del file['timestamp']
 
     return render_template('list.html', file_info=file_info)
-
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
